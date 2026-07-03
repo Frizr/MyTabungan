@@ -176,6 +176,35 @@ class DashboardView extends ConsumerWidget {
                       color: Colors.white70,
                     ),
                   ),
+                  if (goal.targetDate != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.event, color: Colors.white70, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Hari H: ${DateFormat('dd MMM yyyy', 'id_ID').format(goal.targetDate!)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Builder(builder: (context) {
+                          final daysLeft = goal.targetDate!.difference(DateTime.now()).inDays;
+                          final text = daysLeft > 0 ? '($daysLeft hari lagi)' : (daysLeft == 0 ? '(Hari ini!)' : '(Terlewat ${daysLeft.abs()} hari)');
+                          final color = daysLeft > 0 ? AppColors.success : (daysLeft == 0 ? Colors.orangeAccent : AppColors.error);
+                          return Text(
+                            text,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),

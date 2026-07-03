@@ -4,6 +4,7 @@ class SavingsGoal {
   final double targetAmount;
   final double currentAmount;
   final DateTime createdAt;
+  final DateTime? targetDate;
 
   SavingsGoal({
     required this.id,
@@ -11,6 +12,7 @@ class SavingsGoal {
     required this.targetAmount,
     this.currentAmount = 0.0,
     required this.createdAt,
+    this.targetDate,
   });
 
   double get progress => targetAmount > 0 ? (currentAmount / targetAmount) : 0.0;
@@ -22,6 +24,7 @@ class SavingsGoal {
       'targetAmount': targetAmount,
       'currentAmount': currentAmount,
       'createdAt': createdAt.toIso8601String(),
+      'targetDate': targetDate?.toIso8601String(),
     };
   }
 
@@ -34,6 +37,9 @@ class SavingsGoal {
       createdAt: map['createdAt'] != null 
           ? DateTime.parse(map['createdAt']) 
           : DateTime.now(),
+      targetDate: map['targetDate'] != null
+          ? DateTime.parse(map['targetDate'])
+          : null,
     );
   }
 }

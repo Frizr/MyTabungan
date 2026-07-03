@@ -4,6 +4,7 @@ import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import 'package:tabungan_frontend/features/savings/views/dashboard_view.dart';
 import 'package:tabungan_frontend/features/savings/views/report_view.dart';
 import 'package:tabungan_frontend/features/savings/views/widgets/add_goal_sheet.dart';
+import 'package:animations/animations.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key});
@@ -25,38 +26,58 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     return Scaffold(
       extendBody: true, // Allows body to go under the transparent navigation bar
       body: _pages[_currentIndex],
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
+      floatingActionButton: OpenContainer(
+        closedShape: const CircleBorder(),
+        closedColor: AppColors.primary,
+        closedElevation: 0,
+        openElevation: 0,
+        openColor: AppColors.surface,
+        transitionType: ContainerTransitionType.fadeThrough,
+        transitionDuration: const Duration(milliseconds: 400),
+        openBuilder: (context, _) => Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: AppColors.surface,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          body: const SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: AddGoalSheet(),
               ),
-              builder: (context) => const AddGoalSheet(),
-            );
-          },
-          backgroundColor: AppColors.primary,
-          elevation: 0,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add_rounded, color: AppColors.background, size: 32),
+            ),
+          ),
+        ),
+        closedBuilder: (context, openContainer) => Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.primary,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: openContainer,
+            customBorder: const CircleBorder(),
+            child: const Icon(Icons.add_rounded, color: AppColors.background, size: 32),
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        height: 95.0,
+        height: 75.0,
+        padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         color: AppColors.surface.withValues(alpha: 0.95),

@@ -20,7 +20,7 @@ class SavingsController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> addSavingsGoal({required String title, required double targetAmount}) async {
+  Future<void> addSavingsGoal({required String title, required double targetAmount, DateTime? targetDate}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(savingsRepositoryProvider);
@@ -29,6 +29,7 @@ class SavingsController extends AsyncNotifier<void> {
         title: title,
         targetAmount: targetAmount,
         createdAt: DateTime.now(),
+        targetDate: targetDate,
       );
       await repository.addSavingsGoal(newGoal);
     });

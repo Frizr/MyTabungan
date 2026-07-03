@@ -14,6 +14,7 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
+  DateTime? _selectedDate;
 
   @override
   void dispose() {
@@ -30,6 +31,7 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
       await ref.read(savingsControllerProvider.notifier).addSavingsGoal(
             title: title,
             targetAmount: amount,
+            targetDate: _selectedDate,
           );
 
       if (mounted) {
@@ -86,6 +88,35 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
                 if (amount == null || amount <= 0) return 'Nominal tidak valid';
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().add(const Duration(days: 1)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+                );
+                if (date != null) {
+                  setState(() => _selectedDate = date);
+                }
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Target Tanggal (Opsional)',
+                  prefixIcon: Icon(Icons.calendar_month_rounded),
+                ),
+                child: Text(
+                  _selectedDate == null 
+                      ? 'Pilih tanggal rilis / Hari H' 
+                      : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                  style: TextStyle(
+                    color: _selectedDate == null ? AppColors.textSecondary : AppColors.textPrimary,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 32),
             ElevatedButton(

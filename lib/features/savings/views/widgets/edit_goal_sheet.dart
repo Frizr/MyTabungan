@@ -17,12 +17,14 @@ class _EditGoalSheetState extends ConsumerState<EditGoalSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
+  DateTime? _selectedDate;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.goal.title);
     _amountController = TextEditingController(text: widget.goal.targetAmount.toInt().toString());
+    _selectedDate = widget.goal.targetDate;
   }
 
   @override
@@ -43,6 +45,7 @@ class _EditGoalSheetState extends ConsumerState<EditGoalSheet> {
         targetAmount: amount,
         currentAmount: widget.goal.currentAmount,
         createdAt: widget.goal.createdAt,
+        targetDate: _selectedDate,
       );
 
       await ref.read(savingsControllerProvider.notifier).updateSavingsGoal(updatedGoal);
@@ -139,6 +142,35 @@ class _EditGoalSheetState extends ConsumerState<EditGoalSheet> {
                 if (amount == null || amount <= 0) return 'Nominal tidak valid';
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+                );
+                if (date != null) {
+                  setState(() => _selectedDate = date);
+                }
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Target Tanggal (Opsional)',
+                  prefixIcon: Icon(Icons.calendar_month_rounded),
+                ),
+                child: Text(
+                  _selectedDate == null 
+                      ? 'Pilih tanggal rilis / Hari H' 
+                      : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                  style: TextStyle(
+                    color: _selectedDate == null ? AppColors.textSecondary : AppColors.textPrimary,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 32),
             ElevatedButton(

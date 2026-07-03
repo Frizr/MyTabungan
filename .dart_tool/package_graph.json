@@ -7,6 +7,7 @@
       "name": "tabungan_frontend",
       "version": "1.0.0+1",
       "dependencies": [
+        "animations",
         "cloud_firestore",
         "cupertino_icons",
         "firebase_auth",
@@ -62,6 +63,13 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "animations",
+      "version": "2.2.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {

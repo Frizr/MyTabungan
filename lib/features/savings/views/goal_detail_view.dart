@@ -87,6 +87,43 @@ class GoalDetailView extends ConsumerWidget {
                   'Target: ${currencyFormatter.format(currentGoal.targetAmount)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 16),
                 ),
+                if (currentGoal.targetDate != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceHighlight.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.event, color: AppColors.primary, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Hari H: ${DateFormat('dd MMM yyyy', 'id_ID').format(currentGoal.targetDate!)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Builder(builder: (context) {
+                          final daysLeft = currentGoal.targetDate!.difference(DateTime.now()).inDays;
+                          final text = daysLeft > 0 ? '($daysLeft hari lagi)' : (daysLeft == 0 ? '(Hari ini!)' : '(Terlewat ${daysLeft.abs()} hari)');
+                          final color = daysLeft > 0 ? AppColors.success : (daysLeft == 0 ? Colors.orangeAccent : AppColors.error);
+                          return Text(
+                            text,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

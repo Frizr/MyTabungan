@@ -20,6 +20,12 @@
       "languageVersion": "3.9"
     },
     {
+      "name": "animations",
+      "rootUri": "file:///C:/Users/afrizal/AppData/Local/Pub/Cache/hosted/pub.dev/animations-2.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "archive",
       "rootUri": "file:///C:/Users/afrizal/AppData/Local/Pub/Cache/hosted/pub.dev/archive-4.0.9",
       "packageUri": "lib/",
