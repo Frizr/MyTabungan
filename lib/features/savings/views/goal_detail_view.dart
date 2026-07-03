@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:animations/animations.dart';
 import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import '../models/savings_goal.dart';
 import '../controllers/savings_controller.dart';
@@ -217,13 +218,42 @@ class GoalDetailView extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddTransactionSheet(context),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: AppColors.background),
-        label: const Text(
-          'Transaksi',
-          style: TextStyle(color: AppColors.background, fontWeight: FontWeight.bold),
+      floatingActionButton: OpenContainer(
+        closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        closedColor: AppColors.primary,
+        closedElevation: 0,
+        openElevation: 0,
+        openColor: AppColors.surface,
+        transitionType: ContainerTransitionType.fadeThrough,
+        transitionDuration: const Duration(milliseconds: 400),
+        openBuilder: (context, _) => Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: AddTransactionSheet(goal: currentGoal),
+              ),
+            ),
+          ),
+        ),
+        closedBuilder: (context, openContainer) => FloatingActionButton.extended(
+          onPressed: openContainer,
+          backgroundColor: AppColors.primary,
+          elevation: 0,
+          icon: const Icon(Icons.add, color: AppColors.background),
+          label: const Text(
+            'Transaksi',
+            style: TextStyle(color: AppColors.background, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );

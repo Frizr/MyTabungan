@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:intl/intl.dart';
+import 'package:animations/animations.dart';
 
 import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import 'package:tabungan_frontend/features/savings/controllers/savings_controller.dart';
-import 'package:tabungan_frontend/features/auth/repositories/auth_repository.dart';
+import 'package:tabungan_frontend/features/settings/views/settings_view.dart';
 import '../models/savings_goal.dart';
 import 'goal_detail_view.dart';
 import 'widgets/edit_goal_sheet.dart';
@@ -22,12 +23,19 @@ class DashboardView extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('TabunganKu'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.error),
-            onPressed: () {
-              ref.read(authRepositoryProvider).signOut();
-            },
-          )
+          OpenContainer(
+            closedShape: const CircleBorder(),
+            closedColor: Colors.transparent,
+            closedElevation: 0,
+            openElevation: 0,
+            transitionType: ContainerTransitionType.fadeThrough,
+            transitionDuration: const Duration(milliseconds: 400),
+            openBuilder: (context, _) => const SettingsView(),
+            closedBuilder: (context, openContainer) => IconButton(
+              icon: const Icon(Icons.settings_rounded, color: AppColors.textPrimary),
+              onPressed: openContainer,
+            ),
+          ),
         ],
       ),
       body: SafeArea(
@@ -87,14 +95,17 @@ class DashboardView extends ConsumerWidget {
   }
 
   Widget _buildTiltCard(BuildContext context, SavingsGoal goal) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => GoalDetailView(goal: goal),
-          ),
-        );
-      },
+    return OpenContainer(
+      closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      closedColor: Colors.transparent,
+      closedElevation: 0,
+      openElevation: 0,
+      openColor: AppColors.surface,
+      transitionType: ContainerTransitionType.fadeThrough,
+      transitionDuration: const Duration(milliseconds: 500),
+      openBuilder: (context, _) => GoalDetailView(goal: goal),
+      closedBuilder: (context, openContainer) => GestureDetector(
+        onTap: openContainer,
       child: Tilt(
         tiltConfig: const TiltConfig(
           angle: 15,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import 'package:tabungan_frontend/features/savings/controllers/savings_controller.dart';
 
@@ -79,6 +81,101 @@ class ReportView extends ConsumerWidget {
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.primaryVariant),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Interactive Chart
+                  Text(
+                    'Grafik Tabungan',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    height: 250,
+                    padding: const EdgeInsets.only(top: 24, right: 24, bottom: 16, left: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.surfaceHighlight, width: 1),
+                    ),
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: goals.isEmpty ? 100 : goals.map((g) => g.targetAmount).reduce((a, b) => a > b ? a : b) * 1.2,
+                        barTouchData: BarTouchData(
+                          enabled: true,
+                          touchTooltipData: BarTouchTooltipData(
+                            getTooltipColor: (group) => AppColors.primary,
+                            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                              return BarTooltipItem(
+                                '${goals[groupIndex].title}\n${currencyFormatter.format(rod.toY)}',
+                                const TextStyle(color: AppColors.background, fontWeight: FontWeight.bold),
+                              );
+                            },
+                          ),
+                        ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                if (value.toInt() >= 0 && value.toInt() < goals.length) {
+                                  final title = goals[value.toInt()].title;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      title.length > 5 ? '${title.substring(0, 5)}...' : title,
+                                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                                    ),
+                                  );
+                                }
+                                return const Text('');
+                              },
+                              reservedSize: 28,
+                            ),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        ),
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          horizontalInterval: goals.isEmpty ? 100 : (goals.map((g) => g.targetAmount).reduce((a, b) => a > b ? a : b) / 4),
+                          getDrawingHorizontalLine: (value) => FlLine(
+                            color: AppColors.surfaceHighlight,
+                            strokeWidth: 1,
+                            dashArray: [5, 5],
+                          ),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        barGroups: goals.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final goal = entry.value;
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: goal.targetAmount,
+                                color: AppColors.surfaceHighlight,
+                                width: 16,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              BarChartRodData(
+                                toY: goal.currentAmount,
+                                color: goal.progress >= 1.0 ? AppColors.success : AppColors.primary,
+                                width: 16,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ],
+                            showingTooltipIndicators: [],
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),

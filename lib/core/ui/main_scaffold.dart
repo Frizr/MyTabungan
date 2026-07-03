@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import 'package:tabungan_frontend/features/savings/views/dashboard_view.dart';
 import 'package:tabungan_frontend/features/savings/views/report_view.dart';
+import 'package:tabungan_frontend/features/simulator/views/simulator_view.dart';
 import 'package:tabungan_frontend/features/savings/views/widgets/add_goal_sheet.dart';
 import 'package:animations/animations.dart';
 
@@ -18,6 +19,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
   final List<Widget> _pages = const [
     DashboardView(),
+    SimulatorView(),
     ReportView(),
   ];
 
@@ -83,21 +85,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         color: AppColors.surface.withValues(alpha: 0.95),
         elevation: 0,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(
-                icon: Icons.dashboard_rounded,
-                label: 'Beranda',
-                index: 0,
-              ),
-              const SizedBox(width: 48), // Space for FAB
-              _buildNavItem(
-                icon: Icons.analytics_rounded,
-                label: 'Laporan',
-                index: 1,
-              ),
+              _buildNavItem(icon: Icons.home_rounded, label: 'Beranda', index: 0),
+              _buildNavItem(icon: Icons.calculate_rounded, label: 'Simulasi', index: 1),
+              _buildNavItem(icon: Icons.bar_chart_rounded, label: 'Laporan', index: 2),
             ],
           ),
         ),
