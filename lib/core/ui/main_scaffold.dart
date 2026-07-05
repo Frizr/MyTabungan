@@ -17,6 +17,19 @@ class MainScaffold extends ConsumerStatefulWidget {
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   final List<Widget> _pages = const [
     DashboardView(),
@@ -28,7 +41,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true, // Allows body to go under the transparent navigation bar
-      body: _pages[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(), // Smooth bounce effect
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
+        children: _pages,
+      ),
       floatingActionButton: OpenContainer(
         closedShape: const CircleBorder(),
         closedColor: AppColors.primary,
@@ -116,7 +136,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   Widget _buildNavItem({required IconData icon, required String label, required int index}) {
     final isSelected = _currentIndex == index;
     return InkWell(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+        );
+      },
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
