@@ -257,7 +257,5 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE).
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ menggunakan Flutter
-  <br/>
   <strong>MyTabungan</strong> — Tabungan cerdas untuk masa depan cerah ✨
 </p>
