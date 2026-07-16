@@ -49,6 +49,7 @@
 ## ✨ Fitur Unggulan
 
 ### 🏠 MyTabungan — Beranda
+
 - Kartu saldo total dengan efek **3D Tilt Parallax**
 - Daftar target tabungan dengan desain kartu **Glassmorphism**
 - Progress bar visual per target tabungan
@@ -56,23 +57,27 @@
 - Animasi **staggered entrance** saat membuka halaman
 
 ### 🧮 MyKalkulator — Simulasi Nabung
+
 - Masukkan target dana dan durasi waktu
 - Hitung otomatis nominal tabungan per **bulan**, **minggu**, dan **hari**
 - Slider interaktif untuk mengatur durasi
 - Kartu hasil dengan efek tilt 3D
 
 ### 📊 MyLaporan — Laporan Global
+
 - **Donut chart** animasi interaktif (PieChart)
 - Persentase pencapaian total dari semua target
 - Rincian tabungan per target dengan progress bar
 - Statistik keseluruhan keuangan Anda
 
 ### 🔐 Keamanan
+
 - Autentikasi pengguna via **Firebase Auth** (Email & Password)
 - Kunci biometrik (Fingerprint / Face ID) opsional
 - Data terenkripsi dan tersimpan di **Cloud Firestore**
 
 ### 🎨 Desain & Animasi Premium
+
 - **Dark Theme** mewah dengan aksen **Gold/Champagne**
 - Efek **Glassmorphism** (blur + transparansi) di seluruh UI
 - Background **Orbs Bercahaya** yang bergerak perlahan (floating ambient light)
@@ -83,6 +88,7 @@
 - Tipografi premium: **Outfit** (heading) & **Inter** (body) dari Google Fonts
 
 ---
+
 ### 🔄 Application Flow Diagram
 
 ```
@@ -124,14 +130,14 @@
 
 ### 📱 Feature Flow Summary
 
-| Feature | Screen | State Management | Data Source | Animation |
-|---------|--------|------------------|-------------|---------|
-| Login | login_view.dart | authRepositoryProvider | Firebase Auth | Staggered fade-in |
-| Dashboard | dashboard_view.dart | savingsGoalsProvider | Firestore Stream | List animations |
-| Add Goal | add_goal_sheet.dart | savingsControllerProvider | Firestore Batch | Slide transition |
-| Simulator | simulator_view.dart | Local state (StatefulWidget) | User input | Slider transition |
-| Report | report_view.dart | savingsGoalsProvider | Firestore Stream | Chart animation |
-| Settings | settings_view.dart | settingsControllerProvider | SharedPreferences | Fade transitions |
+| Feature   | Screen              | State Management             | Data Source       | Animation         |
+| --------- | ------------------- | ---------------------------- | ----------------- | ----------------- |
+| Login     | login_view.dart     | authRepositoryProvider       | Firebase Auth     | Staggered fade-in |
+| Dashboard | dashboard_view.dart | savingsGoalsProvider         | Firestore Stream  | List animations   |
+| Add Goal  | add_goal_sheet.dart | savingsControllerProvider    | Firestore Batch   | Slide transition  |
+| Simulator | simulator_view.dart | Local state (StatefulWidget) | User input        | Slider transition |
+| Report    | report_view.dart    | savingsGoalsProvider         | Firestore Stream  | Chart animation   |
+| Settings  | settings_view.dart  | settingsControllerProvider   | SharedPreferences | Fade transitions  |
 
 ---
 
@@ -196,18 +202,42 @@ lib/
 
 ## 🛠️ Tech Stack
 
-| Teknologi | Kegunaan |
-|---|---|
-| **Flutter 3.11** | Framework UI cross-platform |
-| **Dart 3.11** | Bahasa pemrograman |
-| **Firebase Auth** | Autentikasi pengguna |
-| **Cloud Firestore** | Database NoSQL real-time |
-| **Riverpod** | State management reaktif |
+| Teknologi           | Kegunaan                    |
+| ------------------- | --------------------------- |
+| **Flutter 3.11**    | Framework UI cross-platform |
+| **Dart 3.11**       | Bahasa pemrograman          |
+| **Firebase Auth**   | Autentikasi pengguna        |
+| **Cloud Firestore** | Database NoSQL real-time    |
+| **Riverpod**        | State management reaktif    |
+
+---
+
+## 🎨 Desain System
+
+### Palet Warna
+
+| Warna            | Hex       | Kegunaan                  |
+| ---------------- | --------- | ------------------------- |
+| 🟫 Deep Black    | `#121212` | Background utama          |
+| ⬛ Surface       | `#1E1E1E` | Kartu & elemen permukaan  |
+| 🟡 Metallic Gold | `#D4AF37` | Aksen utama (Primary)     |
+| 🟨 Champagne     | `#F3E5AB` | Variasi aksen (Secondary) |
+| ⬜ White         | `#FFFFFF` | Teks utama                |
+| 🔘 Gray          | `#A0A0A0` | Teks sekunder             |
+| 🟢 Green         | `#4CAF50` | Status sukses             |
+| 🔴 Red           | `#E57373` | Status error              |
+
+### Tipografi
+
+- **Heading**: [Outfit](https://fonts.google.com/specimen/Outfit) — Bold, modern, geometric
+- **Body**: [Inter](https://fonts.google.com/specimen/Inter) — Clean, readable, versatile
+
 ---
 
 ## 🚀 Cara Menjalankan
 
 ### Prasyarat
+
 - Flutter SDK `>= 3.11.0`
 - Android Studio / VS Code
 - Akun Firebase (untuk backend)
@@ -216,12 +246,14 @@ lib/
 ### Langkah-langkah
 
 1. **Clone repository ini**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/tabungan_online.git
    cd tabungan_online
    ```
 
 2. **Install dependencies**
+
    ```bash
    flutter pub get
    ```
@@ -237,6 +269,7 @@ lib/
      ```
 
 4. **Jalankan aplikasi**
+
    ```bash
    # Mode debug (untuk development)
    flutter run
@@ -253,33 +286,12 @@ lib/
 
 ---
 
-## 🎨 Desain System
-
-### Palet Warna
-
-| Warna | Hex | Kegunaan |
-|---|---|---|
-| 🟫 Deep Black | `#121212` | Background utama |
-| ⬛ Surface | `#1E1E1E` | Kartu & elemen permukaan |
-| 🟡 Metallic Gold | `#D4AF37` | Aksen utama (Primary) |
-| 🟨 Champagne | `#F3E5AB` | Variasi aksen (Secondary) |
-| ⬜ White | `#FFFFFF` | Teks utama |
-| 🔘 Gray | `#A0A0A0` | Teks sekunder |
-| 🟢 Green | `#4CAF50` | Status sukses |
-| 🔴 Red | `#E57373` | Status error |
-
-### Tipografi
-- **Heading**: [Outfit](https://fonts.google.com/specimen/Outfit) — Bold, modern, geometric
-- **Body**: [Inter](https://fonts.google.com/specimen/Inter) — Clean, readable, versatile
-
----
-
 ## 📱 Versi Minimum
 
-| Platform | Versi Minimum |
-|---|---|
-| Android | API 21 (Android 5.0 Lollipop) |
-| iOS | iOS 12.0 |
+| Platform | Versi Minimum                 |
+| -------- | ----------------------------- |
+| Android  | API 21 (Android 5.0 Lollipop) |
+| iOS      | iOS 12.0                      |
 
 ---
 
@@ -298,4 +310,3 @@ Kontribusi sangat diterima! Silakan:
 ## 📄 Lisensi
 
 Proyek ini dilisensikan di bawah [MIT License](LICENSE).
-
