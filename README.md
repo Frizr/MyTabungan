@@ -259,3 +259,370 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE).
 <p align="center">
   <strong>MyTabungan</strong> — Tabungan cerdas untuk masa depan cerah ✨
 </p>
+## 📊 Code Walkthroughs & Visual Diagrams
+
+### 🔄 Application Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      main.dart                             │
+│   ┌─ Initialize Firebase                                  │
+│   ├─ Set Indonesian locale                                  │
+│   └─ Launch MyApp()                                         │
+└───────────────────────┬───────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    MyApp Widget                             │
+│   ┌─ MaterialApp with Dark Theme                           │
+│   └─ Home: AuthChecker                                    │
+└───────────────────────┬───────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   AuthChecker                               │
+│   ┌─ Check Firebase Auth state                            │
+│   │  ├─ CurrentUser EXISTS? ──► YES ──► MainScaffold      │
+│   │  └─ NO ──► Biometric prompt?                          │
+│   │     └─ Authenticated ──► MainScaffold               │
+│   │     └─ Failed ──► LoginView                           │
+│   └─ Biometric fallback to LoginView                       │
+└───────────────────────┬───────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   MainScaffold                              │
+│   ├─ PageView with 3 pages (Dashboard, Simulator, Report)   │
+│   ├─ Bottom Navigation (Glassmorphism + Gold indicator)      │
+│   └─ AppBar transparent                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔐 Authentication Deep Dive
+
+#### Flow: Login Process
+
+```dart
+// lib/features/auth/views/login_view.dart (simplified)
+class _LoginViewState extends ConsumerState<LoginView> {
+  Future<void> _submit() async {
+    // 1. Show loading state
+    setState(() => _isLoading = true);
+    
+    try {
+      // 2. Validate & submit to Firebase Auth
+      final auth = ref.read(authRepositoryProvider);
+      if (_isLogin) {
+        await auth.signInWithEmail(email, password);
+      } else {
+        await auth.signUpWithEmail(email, password);
+      }
+      // 3. SUCCESS → AuthChecker auto-redirect to MainScaffold
+    } catch (e) {
+      // 4. ERROR → Show user-friendly Snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error)
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+}
+```
+
+#### Security Architecture
+
+```
+┌─────────────────┐
+│   User Device   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐      ┌──────────────────┐
+│ Firebase Auth   │─────►│ Email/Password   │
+└────────┬────────┘      │ Biometric (local_ │
+         │               │ auth)            │
+         ▼               └──────────────────┘
+┌─────────────────┐
+│ Security Rules  │
+│ IF user.id ==   │
+│ resource.id     │
+│ ALLOW read/write│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Cloud Firestore │
+│ /users/{userId} │
+│   └─ /goals     │
+│   └─ /settings  │
+└─────────────────┘
+```
+
+---
+
+### 💾 Firestore Data Structure
+
+```
+Firestore Collections:
+┌─ users/{userId}/                    [Document]
+  ├─ savings_goals/{goalId}/         [Collection]
+  │  ├─ title: "Liburan Bali"
+  │  ├─ targetAmount: 5000000
+  │  ├─ currentAmount: 1250000
+  │  ├─ createdAt: 2024-01-15
+  │  ├─ targetDate: 2024-12-31
+  │  └─ transactions/{txId}/         [Sub-collection]
+  │     ├─ amount: 250000
+  │     ├─ note: "Setoran gaji"
+  │     ├─ date: 2024-01-20
+  │     └─ updatedAt: 2024-01-20
+  │
+  ├─ savings_goals/{goalId}/         [Another Goal]
+  │  ├─ title: "Beli Laptop"
+  │  └─ ...
+  │
+  └─ settings/{docId}
+     ├─ biometricEnabled: true
+     └─ notifications: true
+```
+
+---
+
+### 🧠 State Management Flow
+
+```dart
+// Riverpod Architecture
+┌──────────────────────────────────────────────┐
+// 1. PROVIDERS (Global State)
+└──────────────────────────────────────────────┘
+
+// StreamProvider — Real-time data listening
+final savingsGoalsProvider = StreamProvider<List<SavingsGoal>>((ref) {
+  final repository = ref.watch(savingsRepositoryProvider);
+  return repository.watchSavingsGoals();  // ← Continuous listener
+});
+
+// AsyncNotifierProvider — Mutations (add/edit/delete)
+final savingsControllerProvider = AsyncNotifierProvider<SavingsController, void>(() {
+  return SavingsController();
+});
+
+┌──────────────────────────────────────────────┐
+// 2. CONTROLLER (Business Logic)
+└──────────────────────────────────────────────┘
+class SavingsController extends AsyncNotifier<void> {
+  Future<void> addSavingsGoal(...) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {  // ← Auto error handling
+      final repository = ref.read(savingsRepositoryProvider);
+      final newGoal = SavingsGoal(...);
+      await repository.addSavingsGoal(newGoal);
+    });
+  }
+}
+
+┌──────────────────────────────────────────────┐
+// 3. REPOSITORY (Data Operations)
+└──────────────────────────────────────────────┘
+class SavingsRepository {
+  Stream<List<SavingsGoal>> watchSavingsGoals() {
+    return _firestore.collection('users')
+      .doc(userId)
+      .collection('savings_goals')
+      .snapshots()           // ← Real-time
+      .map((snapshot) => snapshot.docs
+        .map((doc) => SavingsGoal.fromMap(doc.data(), doc.id))
+        .toList());
+  }
+}
+
+┌──────────────────────────────────────────────┐
+// 4. VIEW (UI Consumption)
+└──────────────────────────────────────────────┘
+class DashboardView extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goalsAsync = ref.watch(savingsGoalsProvider);
+    
+    return goalsAsync.when(  // ← Reactive state handling
+      data: (goals) => _buildGoalsList(goals),
+      loading: () => CircularProgressIndicator(),
+      error: (err, stack) => Text('Error: $err'),
+    );
+  }
+}
+```
+
+---
+
+### 📊 Dashboard UI Architecture
+
+```dart
+// lib/features/savings/views/dashboard_view.dart (simplified structure)
+ListView(
+  children: [
+    // 1. Total Balance Card (3D Tilt Effect)
+    TiltWidget(
+      child: GlassmorphismContainer(
+        child: Column([
+          Text('Total Saldo', style: Theme.textTheme.bodyMedium),
+          AnimatedCount(
+            count: _calculateTotalAmount(goals),
+            duration: 800.ms,
+          ),
+          LinearProgressIndicator(value: _overallProgress(goals)),
+        ]),
+      ),
+    ),
+    
+    // 2. Goals List (Animated)
+    ListView.builder(
+      itemCount: goals.length,
+      itemBuilder: (context, index) => 
+        AnimatedGoalCard(goal: goals[index]),
+    ),
+    
+    // 3. Floating Action Button
+    FloatingActionButton.extended(
+      onPressed: () => showAddGoalSheet(context),
+      label: Text('Tambah Target'),
+      icon: Icon(Icons.add),
+    ),
+  ],
+)
+```
+
+#### Widget Tree Visualization
+
+```
+DashboardView
+├─ CustomScrollView
+│  ├─ SliverToBoxAdapter
+│  │  └─ TotalBalanceCard (TiltWidget + Glassmorphism)
+│  ├─ SliverAnimatedList
+│  │  └─ AnimatedGoalCard (each goal)
+│  │     ├─ GlassmorphismContainer
+│  │     ├─ ProgressIndicator (custom)
+│  │     ├─ CountdownWidget
+│  │     └─ RippleEffect (InkWell)
+│  └─ SliverToBoxAdapter
+│     └─ FloatingActionButton
+└─ AddGoalSheet (showModalBottomSheet)
+   ├─ TextField (title)
+   ├─ TextField (amount)
+   ├─ DatePicker (target date)
+   └─ SubmitButton
+```
+
+---
+
+### 🧮 Simulator Logic Walkthrough
+
+```dart
+// lib/features/simulator/views/simulator_view.dart
+class SimulatorView extends StatefulWidget {
+  // Logic: Calculate daily/weekly/monthly savings needed
+  
+  double _calculateDaily(double target, DateTime start, DateTime end) {
+    final days = end.difference(start).inDays;
+    return days > 0 ? target / days : 0;
+  }
+  
+  double _calculateWeekly(double target, DateTime start, DateTime end) {
+    final weeks = end.difference(start).inDays / 7;
+    return weeks > 0 ? target / weeks : 0;
+  }
+  
+  double _calculateMonthly(double target, DateTime start, DateTime end) {
+    final months = (end.year - start.year) * 12 + (end.month - start.month);
+    return months > 0 ? target / months : 0;
+  }
+}
+```
+
+---
+
+### 📈 Report Chart Integration
+
+```dart
+// lib/features/savings/views/report_view.dart
+PieChart(
+  PieChartData(
+    sections: goals.map((goal) => PieChartSectionData(
+      value: goal.currentAmount,
+      color: goal.color,  // From AppColors palette
+      radius: 50,
+      title: '${(goal.currentAmount / goal.targetAmount * 100).toStringAsFixed(0)}%',
+    )).toList(),
+    centerSpaceRadius: 40,
+  ),
+)
+```
+
+---
+
+### 🎨 Glassmorphism Effect Implementation
+
+```dart
+// lib/core/theme/app_theme.dart
+BoxDecoration(
+  color: Colors.white.withValues(alpha: 0.1),  // Blur effect
+  borderRadius: BorderRadius.circular(20),
+  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.1),
+      blurRadius: 10,
+    ),
+  ],
+)
+```
+
+---
+
+### 📱 Feature Flow Summary
+
+| Feature | Screen | State Management | Data Source | Animation |
+|---------|--------|------------------|-------------|---------|
+| Login | login_view.dart | authRepositoryProvider | Firebase Auth | Staggered fade-in |
+| Dashboard | dashboard_view.dart | savingsGoalsProvider | Firestore Stream | List animations |
+| Add Goal | add_goal_sheet.dart | savingsControllerProvider | Firestore Batch | Slide transition |
+| Simulator | simulator_view.dart | Local state (StatefulWidget) | User input | Slider transition |
+| Report | report_view.dart | savingsGoalsProvider | Firestore Stream | Chart animation |
+| Settings | settings_view.dart | settingsControllerProvider | SharedPreferences | Fade transitions |
+
+---
+
+### 🛠️ Tech Stack Relationships
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Flutter                             │
+│  ├─ UI Rendering (Widgets)                                  │
+│  ├─ Navigation (PageView + BottomNav)                       │
+│  └─ Animations (Hero, SharedAxis, Tilt)                     │
+├─────────────────────────────────────────────────────────────┤
+│                    Flutter Riverpod                           │
+│  ├─ StreamProvider (real-time data)                         │
+│  ├─ AsyncNotifierProvider (mutations)                        │
+│  └─ Provider (services injection)                           │
+├─────────────────────────────────────────────────────────────┤
+│                     Firebase Ecosystem                     │
+│  ├─ Authentication (Email + Biometric)                      │
+│  ├─ Cloud Firestore (Database)                              │
+│  └─ Security Rules (User isolation)                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Next Steps
+
+- [ ] Implement offline sync capability
+- [ ] Add comprehensive test coverage
+- [ ] Export reports to PDF/Excel
+- [ ] Add notification reminders
+- [ ] Implement dark/light theme toggle
