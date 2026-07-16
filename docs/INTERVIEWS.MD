@@ -1,9 +1,11 @@
 # 🎯 MyTabungan — HR Interview Practice Guide
+
 **Panduan Lengkap Persiapan Interview untuk Project MyTabungan**
 
 ---
 
 ## 📋 Daftar Isi
+
 1. [Project Overview & Storytelling](#1-project-overview--storytelling)
 2. [Technical Communication](#2-technical-communication)
 3. [Problem-Solving Narratives](#3-problem-solving-narratives)
@@ -21,14 +23,14 @@
 **When asked: "Tell me about your recent project"**
 
 ```
-"MyTabungan adalah aplikasi mobile untuk pencatatan dan perencanaan tabungan pribadi 
-yang saya kembangkan menggunakan Flutter dan Firebase. 
+"MyTabungan adalah aplikasi mobile untuk pencatatan dan perencanaan tabungan pribadi
+yang saya kembangkan menggunakan Flutter dan Firebase.
 
-Idenya sederhana namun powerful: banyak orang kesulitan mengelola target tabungan mereka 
+Idenya sederhana namun powerful: banyak orang kesulitan mengelola target tabungan mereka
 karena kurang tracking yang visual dan terstruktur. MyTabungan mengatasi ini dengan:
 
 1. Dashboard yang elegan untuk melihat semua target tabungan dalam satu tempat
-2. Fitur simulasi cerdas — user bisa lihat berapa harus menabung per hari/minggu/bulan 
+2. Fitur simulasi cerdas — user bisa lihat berapa harus menabung per hari/minggu/bulan
    untuk capai target
 3. Laporan visual dengan chart yang interaktif
 4. Keamanan biometrik (fingerprint) agar data finansial aman
@@ -38,11 +40,12 @@ Dari sisi teknis, saya fokus pada tiga hal:
 - Real-time data sync menggunakan Firebase Firestore
 - Premium UI/UX dengan Glassmorphism design
 
-Project ini fully functional dan production-ready dengan ~2000+ lines of Dart code 
+Project ini fully functional dan production-ready dengan ~2000+ lines of Dart code
 across 25+ files."
 ```
 
 **Key Points untuk Diingat:**
+
 - ✅ Mulai dari **problem** (apa yang dipecahkan), bukan tools
 - ✅ Jelaskan **user value** — apa yang end-user dapatkan
 - ✅ Sebutkan **technical stack** sebagai supporting detail
@@ -55,6 +58,7 @@ across 25+ files."
 **Ketika HR bertanya: "Walk me through the main features"**
 
 #### **Feature 1: Authentication & Security**
+
 ```
 "Pertama, masalah keamanan. User perlu login untuk akses data finansial mereka.
 
@@ -63,11 +67,12 @@ Kami implement:
 - Biometric unlock (fingerprint / Face ID) pakai package local_auth
 - Session management otomatis
 
-Alur: User login → Firebase authenticate → biometric option ditawar → 
+Alur: User login → Firebase authenticate → biometric option ditawar →
 akses ke dashboard. Simple tapi secure."
 ```
 
 #### **Feature 2: Dashboard (Home)**
+
 ```
 "Dashboard adalah jantung aplikasi. Menampilkan:
 - Kartu saldo total dengan efek 3D parallax (flutter_tilt package)
@@ -79,6 +84,7 @@ Setiap kartu bisa diklik untuk lihat detail target dan history transaksi."
 ```
 
 #### **Feature 3: Goal Management (CRUD)**
+
 ```
 "User bisa tambah, edit, delete target tabungan. Setiap target punya:
 - Title & target amount
@@ -86,11 +92,12 @@ Setiap kartu bisa diklik untuk lihat detail target dan history transaksi."
 - Current amount (accumulated dari transactions)
 - Progress percentage
 
-Real-time sync dengan Firestore — kalau user tambah transaction di target A, 
+Real-time sync dengan Firestore — kalau user tambah transaction di target A,
 progress bar instantly update."
 ```
 
 #### **Feature 4: Simulator/Calculator**
+
 ```
 "Fitur ini unique — calculator yang smart. User input:
 - Target amount (berapa mau ditabung)
@@ -98,13 +105,14 @@ progress bar instantly update."
 
 Sistem automatic hitung:
 - Per month: berapa minimal per bulan
-- Per week: berapa minimal per minggu  
+- Per week: berapa minimal per minggu
 - Per day: berapa minimal per hari
 
 Pakai slider untuk interaktif adjustment. Result ditampilkan dengan kartu 3D tilt effect."
 ```
 
 #### **Feature 5: Reports & Analytics**
+
 ```
 "Halaman report menampilkan:
 - Donut chart animasi (menggunakan fl_chart) — progress percentage dari semua target
@@ -163,6 +171,7 @@ Keuntungan architecture ini:
 **When asked: "Why did you choose Flutter, Firebase, and Riverpod?"**
 
 #### **Flutter**
+
 ```
 "Flutter dipilih karena:
 1. Cross-platform (satu codebase untuk Android & iOS) — faster development
@@ -170,29 +179,31 @@ Keuntungan architecture ini:
 3. Rich widget ecosystem — build premium UI dengan mudah
 4. Performance bagus — compiled to native code, bukan interpreted
 
-Untuk financial app seperti MyTabungan, Flutter pas banget karena 
+Untuk financial app seperti MyTabungan, Flutter pas banget karena
 perlu smooth animations dan responsive UI."
 ```
 
 #### **Firebase**
+
 ```
 "Firebase paket complete:
 1. Firebase Auth — authenticate user tanpa build backend sendiri
 2. Firestore — real-time NoSQL database, data sync otomatis
 3. Security rules — bisa set granular permission (user A hanya lihat data user A)
 
-Keuntungan: 
+Keuntungan:
 - Scalable tanpa worry about infrastructure
-- Real-time listening — kalau user A edit goal, 
+- Real-time listening — kalau user A edit goal,
   app user B instantly lihat update-nya
 - Great documentation & community"
 ```
 
 #### **Riverpod**
+
 ```
 "Riverpod adalah state management library untuk Dart/Flutter.
 
-Solvenya: 
+Solvenya:
 1. Keep UI & business logic separated
 2. Manage async data (loading/error/success states)
 3. Reactive updates — kalau data berubah, UI automatic rebuild
@@ -207,15 +218,17 @@ Alternatif (GetX, BLoC) lebih verbose. Riverpod lebih elegant & testable."
 ### 3.1 Scenario: "Challenge with Real-Time Data Sync"
 
 **The Problem:**
+
 ```
-"Saat development, issue yang muncul: 
-Ketika user add transaction ke Goal A, progress bar di dashboard 
+"Saat development, issue yang muncul:
+Ketika user add transaction ke Goal A, progress bar di dashboard
 tidak immediate update — harus refresh page manually."
 ```
 
 **How I Solved It:**
+
 ```
-"Root cause: UI reading dari Firestore snapshot statis, bukan listening 
+"Root cause: UI reading dari Firestore snapshot statis, bukan listening
 to real-time updates.
 
 Solution pakai Stream:
@@ -224,13 +237,14 @@ Solution pakai Stream:
 - Di UI, pakai StreamProvider dari Riverpod untuk consume stream
 - Setiap ada perubahan di Firestore, UI automatic rebuild
 
-Hasil: Real-time sync works perfectly — user add transaction, 
+Hasil: Real-time sync works perfectly — user add transaction,
 dashboard instantly update tanpa refresh."
 ```
 
 ### 3.2 Scenario: "Database Transaction Consistency"
 
 **The Problem:**
+
 ```
 "Ketika user add transaction:
 - Transaction document harus dibuat di Firestore
@@ -240,6 +254,7 @@ Kalau hanya satu yang berhasil, data jadi inconsistent."
 ```
 
 **How I Solved It:**
+
 ```
 "Pakai Firestore batch operations:
 
@@ -255,19 +270,21 @@ batch.update(goalRef, {
 
 await batch.commit(); // Semua jalan atomically — semua sukses atau semua gagal
 
-Benefit: Data integrity terjamin. Kalau salah satu fail, 
+Benefit: Data integrity terjamin. Kalau salah satu fail,
 transaction otomatis rollback."
 ```
 
 ### 3.3 Scenario: "Performance with Large Lists"
 
 **The Problem:**
+
 ```
-"Aplikasi jadi slow saat user punya 50+ savings goals karena 
+"Aplikasi jadi slow saat user punya 50+ savings goals karena
 rebuild seluruh list setiap ada change."
 ```
 
 **How I Solve (if encountered):**
+
 ```
 "Strategi optimasi:
 1. Add pagination — load 10 goals, user scroll load more
@@ -316,19 +333,19 @@ Tapi untuk MVP, 50 goals still acceptable performance-wise dengan current setup.
 ```
 "Dari project ini, saya belajar:
 
-1. State Management at scale — Riverpod patterns untuk handle 
+1. State Management at scale — Riverpod patterns untuk handle
    async operations & stream data
 
-2. Real-time database design — Firestore best practices 
+2. Real-time database design — Firestore best practices
    (collection structure, indexing, security rules)
 
-3. Mobile UX patterns — animation timing, loading states, 
+3. Mobile UX patterns — animation timing, loading states,
    error handling untuk smooth experience
 
-4. Clean architecture — separation concerns buat code maintainable 
+4. Clean architecture — separation concerns buat code maintainable
    & testable
 
-5. Firebase ecosystem — dari auth sampai database 
+5. Firebase ecosystem — dari auth sampai database
    sampai security integration"
 ```
 
@@ -341,16 +358,17 @@ Tapi untuk MVP, 50 goals still acceptable performance-wise dengan current setup.
 **Setup:** Interviewee asks about difficulty/challenge
 
 **Your Answer:**
+
 ```
 "Technical challenge yang significant: implementing real-time data sync.
 
-Situation: 
-Dashboard menampilkan list savings goals dengan progress bar. 
-Ketika user add transaction di goal tertentu, perlu instant update 
+Situation:
+Dashboard menampilkan list savings goals dengan progress bar.
+Ketika user add transaction di goal tertentu, perlu instant update
 di dashboard tanpa manual refresh.
 
 Task:
-Saya perlu design architecture yang efficient untuk real-time updates 
+Saya perlu design architecture yang efficient untuk real-time updates
 across multiple parts aplikasi.
 
 Action:
@@ -360,12 +378,13 @@ Action:
 - Test dengan multiple concurrent updates
 
 Result:
-Real-time sync works smoothly. User experience jadi seamless — 
-app always show latest data. Plus, architecture jadi reusable 
+Real-time sync works smoothly. User experience jadi seamless —
+app always show latest data. Plus, architecture jadi reusable
 untuk fitur lain yang perlu real-time updates."
 ```
 
 **Why This Works:**
+
 - ✅ Tell konkret challenge, bukan generic statement
 - ✅ Walk through SITUATION → TASK → ACTION → RESULT
 - ✅ Show problem-solving approach, bukan just solution
@@ -378,6 +397,7 @@ untuk fitur lain yang perlu real-time updates."
 **Setup:** Interviewee asks about best practices
 
 **Your Answer:**
+
 ```
 "Code quality saya maintain dengan beberapa practices:
 
@@ -410,6 +430,7 @@ Result: Code maintainable, scalable, & easy untuk collaborate dengan team."
 ```
 
 **Why This Works:**
+
 - ✅ Show systematic approach ke quality, bukan ad-hoc
 - ✅ Give specific examples dari project
 - ✅ Acknowledge improvement areas (testing — future work)
@@ -421,6 +442,7 @@ Result: Code maintainable, scalable, & easy untuk collaborate dengan team."
 **Setup:** Ask about Firestore collection structure
 
 **Your Answer:**
+
 ```
 "Database structure design untuk MyTabungan:
 
@@ -436,30 +458,31 @@ Result: Code maintainable, scalable, & easy untuk collaborate dengan team."
 Decision reasoning:
 
 1. User isolation (Security):
-   Setiap user punya separate document. Firestore security rules 
+   Setiap user punya separate document. Firestore security rules
    jadi simple: user hanya bisa access documents di folder mereka sendiri.
-   
+
    Rule: allow read/write if request.auth.uid == userId
 
 2. Goal-Transaction nesting (Consistency):
    Transactions nested di bawah goal (bukan flat collection).
-   Benefit: kalau delete goal, transactions otomatis delete juga 
+   Benefit: kalau delete goal, transactions otomatis delete juga
    (cascade delete).
 
 3. Scalability:
-   Struktur ini support hundreds of goals & thousands of transactions 
+   Struktur ini support hundreds of goals & thousands of transactions
    per user tanpa performance issue.
 
 4. Query simplicity:
    Fetch all goals: collection('users').doc(userId)
                     .collection('savings_goals').get()
-   
+
    Fetch transactions for goal X: ...collection('transactions').get()
-   
+
    Simple queries = fast execution = better performance"
 ```
 
 **Why This Works:**
+
 - ✅ Show structural thinking, bukan random choices
 - ✅ Explain trade-offs (security vs performance vs maintainability)
 - ✅ Anticipate future scaling concerns
@@ -474,7 +497,7 @@ Decision reasoning:
 GOOD ANSWER:
 "Biggest learning was understanding importance of architecture decisions upfront.
 
-Initially saya design database structure tanpa think deeply tentang scalability. 
+Initially saya design database structure tanpa think deeply tentang scalability.
 Setelah implement fitur real-time sync, realize struktur bisa optimized.
 
 Dari sini, saya learn untuk:
@@ -482,7 +505,7 @@ Dari sini, saya learn untuk:
 - Think tentang scalability dari awal
 - Document design decisions untuk future reference
 
-Sekarang, whenever start project baru, always ask: 
+Sekarang, whenever start project baru, always ask:
 'Will this scale? Easy untuk maintain? Easy untuk test?'"
 ```
 
@@ -498,7 +521,7 @@ GOOD ANSWER:
    - Local SQLite database untuk cached data
    - Sync changes saat connection available
    - User masih bisa use app tanpa internet
-   
+
 2. Advanced reporting
    - Export reports to PDF/Excel
    - Spending trends analysis
@@ -508,8 +531,8 @@ GOOD ANSWER:
    - Unit tests untuk business logic
    - Widget tests untuk UI components
    - Integration tests untuk end-to-end flows
-   
-Currently tidak implement karena prioritas MVP — get core features working 
+
+Currently tidak implement karena prioritas MVP — get core features working
 solid dulu sebelum add nice-to-have features."
 ```
 
@@ -523,7 +546,7 @@ GOOD ANSWER:
 
 1. Data layer (Repository):
    Try-catch untuk Firebase operations. Log error, throw meaningful exception.
-   
+
    Example:
    try {
      await firestore.collection('users').doc(userId).update(data);
@@ -533,7 +556,7 @@ GOOD ANSWER:
 
 2. Business logic layer (Controller):
    Catch exceptions dari repository, transform ke user-friendly messages.
-   
+
    Example:
    state = await AsyncValue.guard(() async {
      await repository.addGoal(goal);
@@ -541,7 +564,7 @@ GOOD ANSWER:
 
 3. UI layer (Views):
    Display error messages ke user pakai SnackBar atau dialog.
-   
+
    Kalau error persistent, show retry button atau guidance.
 
 Result: Users always tahu apa yang terjadi, why it failed, apa action next."
@@ -567,7 +590,7 @@ GOOD ANSWER:
 3. Cost & scalability:
    - Firebase serverless → no infrastructure cost
    - Alternative REST API → might need dedicated servers
-   
+
    For MyTabungan, Firebase perfect karena:
    - Personal finance app — sensitive data perlu security ✓
    - Real-time sync requirement ✓
@@ -591,6 +614,7 @@ Set 2 minutes. Record yourself or practice dengan mirror.
 **Prompt:** "Tell me about MyTabungan project"
 
 **Checklist:**
+
 - [ ] Start dengan problem/user value
 - [ ] Mention main features (3-5 points)
 - [ ] Explain tech stack briefly
@@ -599,12 +623,13 @@ Set 2 minutes. Record yourself or practice dengan mirror.
 - [ ] Confidence: speak clearly, maintain eye contact (if video)
 
 **Practice Script Template:**
+
 ```
 "MyTabungan adalah... [problem].
 
 Key features:
 1. [Feature A]
-2. [Feature B]  
+2. [Feature B]
 3. [Feature C]
 
 Tech stack: Flutter, Firebase, Riverpod untuk [reason].
@@ -620,6 +645,7 @@ Impact: [metrics/results]."
 Pick one feature. Explain seperti sedang demo ke client.
 
 **Scenarios:**
+
 1. **Authentication Flow**
    - How user login?
    - Where data stored?
@@ -636,6 +662,7 @@ Pick one feature. Explain seperti sedang demo ke client.
    - Animation/design choices?
 
 **Template Untuk Jawab:**
+
 ```
 "Feature [X]:
 
@@ -663,6 +690,7 @@ Design/UX:
 Pick scenario. Answer seperti discuss dengan colleague.
 
 **Scenario A: Performance Issue**
+
 ```
 "User reports: Dashboard slow saat ada 50+ savings goals.
 
@@ -677,6 +705,7 @@ Steps:
 ```
 
 **Scenario B: Feature Request**
+
 ```
 "Client request: 'Add offline capability so user can access app tanpa internet.'
 
@@ -691,6 +720,7 @@ Steps:
 ```
 
 **Scenario C: Bug Investigation**
+
 ```
 "User report: 'Goal's progress bar shows wrong percentage after I delete a transaction.'
 
@@ -714,6 +744,7 @@ Explain concept tanpa technical jargon. Practice explaining to non-technical per
 **Concepts to Explain:**
 
 1. **State Management (Riverpod)**
+
 ```
 TECHNICAL: "Riverpod manages reactive state via providers & consumers"
 
@@ -722,18 +753,20 @@ automatically notify all UI parts listening ke data itu. No manual refresh neede
 ```
 
 2. **Real-Time Sync (Firestore)**
+
 ```
 TECHNICAL: "Firestore stream listeners update UI when database changes"
 
-NON-TECHNICAL: "Like getting live updates. Change data di database, 
+NON-TECHNICAL: "Like getting live updates. Change data di database,
 all connected phones instantly see update. No polling needed."
 ```
 
 3. **Biometric Auth**
+
 ```
 TECHNICAL: "local_auth package integrates device fingerprint/face recognition"
 
-NON-TECHNICAL: "Just use your fingerprint atau face to unlock app, 
+NON-TECHNICAL: "Just use your fingerprint atau face to unlock app,
 like unlocking your phone. More secure than password."
 ```
 
@@ -748,6 +781,7 @@ Explain each ke 5 different people. Collect feedback on clarity.
 Ask someone to interview you (friend/colleague/family).
 
 **Interview Question Bank:**
+
 ```
 1. "Tell me about MyTabungan project"
 2. "What was biggest technical challenge?"
@@ -762,6 +796,7 @@ Ask someone to interview you (friend/colleague/family).
 ```
 
 **Format:**
+
 - 20-30 minutes session
 - Interviewer picks 4-5 random questions
 - Record atau have person give feedback
@@ -844,6 +879,7 @@ Ask someone to interview you (friend/colleague/family).
 ## 10. Quick Reference Cards
 
 ### Card 1: The Elevator Pitch
+
 ```
 "MyTabungan adalah aplikasi tabungan pribadi built dengan Flutter & Firebase.
 Helps users set savings goals, track progress, & calculate how much to save daily.
@@ -853,6 +889,7 @@ Real-time sync, biometric security, premium UI dengan Glassmorphism design."
 ```
 
 ### Card 2: Architecture in 10 Seconds
+
 ```
 "Three layers:
 - UI: Views & widgets user interact with
@@ -863,6 +900,7 @@ Separation of concerns — easy to test & maintain."
 ```
 
 ### Card 3: Key Tech Stack
+
 ```
 - Flutter: Cross-platform UI framework
 - Firebase: Authentication + real-time database
@@ -872,6 +910,7 @@ Separation of concerns — easy to test & maintain."
 ```
 
 ### Card 4: Top 3 Achievements
+
 ```
 1. Real-time data sync — changes reflect instantly across app
 2. Secure authentication — email + biometric with Firestore rules
@@ -883,25 +922,28 @@ Separation of concerns — easy to test & maintain."
 ## 11. Body Language & Communication Tips
 
 ### Verbal Communication
+
 - **Pace:** Speak slightly slower than normal (clear enunciation)
 - **Volume:** Loud enough to hear clearly (but not overwhelming)
 - **Enthusiasm:** Show genuine passion untuk project
 - **Specificity:** Use concrete examples, avoid vague statements
 
 ### Non-Verbal Communication (if video)
+
 - **Eye contact:** Look at camera, not screen (creates connection)
 - **Posture:** Sit up straight, not slouched
 - **Hand gestures:** Use naturally untuk emphasize points
 - **Facial expression:** Smile appropriately, show engagement
 
 ### When You Don't Know Answer
+
 ```
-GOOD: "That's good question. Based on my understanding, I would approach it 
+GOOD: "That's good question. Based on my understanding, I would approach it
 this way... but I'd want to research [specific thing] to give better answer."
 
 NOT GOOD: "Um... I don't know."
 
-Alternative: "I haven't encountered this specific scenario, but here's how I'd 
+Alternative: "I haven't encountered this specific scenario, but here's how I'd
 troubleshoot: [approach]. Let me research & get back to you."
 ```
 
@@ -910,12 +952,14 @@ troubleshoot: [approach]. Let me research & get back to you."
 ## 12. Final Tips
 
 ### Remember
+
 - HR evaluate **communication skills** → explain technical concept clearly
 - HR evaluate **problem-solving approach** → walk through thinking process
 - HR evaluate **self-awareness** → know strengths & areas untuk growth
 - HR evaluate **enthusiasm** → genuine passion untuk project & learning
 
 ### Focus Areas
+
 1. **Tell good stories** — use STAR method (Situation, Task, Action, Result)
 2. **Be genuine** — don't pretend know things you don't
 3. **Show learning** — what did project teach you?
@@ -923,6 +967,7 @@ troubleshoot: [approach]. Let me research & get back to you."
 5. **Stay humble** — acknowledge improvements needed & future learning
 
 ### Success Indicators
+
 - ✅ Can explain project in 2 minutes without script
 - ✅ Can describe architecture without diagram
 - ✅ Have 3+ problem-solving stories ready
@@ -934,6 +979,5 @@ troubleshoot: [approach]. Let me research & get back to you."
 
 **Good luck dengan interview! 🚀**
 
-Remember: HR tidak expect perfect answers. They want see how you think, 
+Remember: HR tidak expect perfect answers. They want see how you think,
 communicate, & approach problems. Be confident, be clear, be genuine.
-
