@@ -9,6 +9,7 @@ import 'package:tabungan_frontend/features/settings/views/settings_view.dart';
 import '../models/savings_goal.dart';
 import 'goal_detail_view.dart';
 import 'widgets/edit_goal_sheet.dart';
+import 'widgets/goal_type_toggle.dart';
 import 'widgets/looping_background.dart';
 import 'package:flutter_tilt/flutter_tilt.dart';
 
@@ -56,8 +57,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           SafeArea(
             child: savingsAsync.when(
               data: (goals) {
-            final totalSavings = goals.fold<double>(0, (sum, item) => sum + item.currentAmount);
-            
+            final totalWalletSaldo = goals
+                .where((item) => item.isWallet)
+                .fold<double>(0, (sum, item) => sum + item.currentAmount);
+
             return Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -105,7 +108,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    'Total Saldo Anda',
+                                    'Total Saldo Dompet',
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                           color: AppColors.textSecondary.withValues(alpha: 0.9),
                                           letterSpacing: 0.5,
@@ -119,7 +122,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: TweenAnimationBuilder<double>(
-                                  tween: Tween(begin: 0, end: totalSavings),
+                                  tween: Tween(begin: 0, end: totalWalletSaldo),
                                   duration: const Duration(milliseconds: 800),
                                   curve: Curves.easeOutCubic,
                                   builder: (context, value, _) {
@@ -193,10 +196,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) => GoalDetailView(goal: goal),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              var tween = Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(CurveTween(curve: Curves.easeOutCubic));
-              return SlideTransition(position: animation.drive(tween), child: child);
+              // Fade + gentle scale-up instead of a slide — matches the
+              // fadeThrough language already used by the transaction sheet.
+              final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+              final scale = Tween(begin: 0.96, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+              return FadeTransition(
+                opacity: fade,
+                child: ScaleTransition(scale: scale, child: child),
+              );
             },
-            transitionDuration: const Duration(milliseconds: 350),
+            transitionDuration: const Duration(milliseconds: 300),
           ),
         );
       },
@@ -231,15 +242,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          goal.title,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GoalTypeBadge(type: goal.type),
+                            const SizedBox(height: 8),
+                            Text(
+                              goal.title,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                       IconButton(
@@ -269,62 +287,76 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           fontWeight: FontWeight.w800,
                         ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Target: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(goal.targetAmount)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white70,
-                    ),
-                  ),
-                  if (goal.targetDate != null) ...[
-                    const SizedBox(height: 4),
+                  if (goal.isWallet) ...[
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.event, color: Colors.white70, size: 14),
-                        const SizedBox(width: 4),
+                        Icon(Icons.all_inclusive_rounded, color: Colors.white.withValues(alpha: 0.5), size: 14),
+                        const SizedBox(width: 6),
                         Text(
-                          'Hari H: ${DateFormat('dd MMM yyyy', 'id_ID').format(goal.targetDate!)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          'Saldo bebas, tanpa target',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
                         ),
-                        const SizedBox(width: 8),
-                        Builder(builder: (context) {
-                          final daysLeft = goal.targetDate!.difference(DateTime.now()).inDays;
-                          final text = daysLeft > 0 ? '($daysLeft hari lagi)' : (daysLeft == 0 ? '(Hari ini!)' : '(Terlewat ${daysLeft.abs()} hari)');
-                          final color = daysLeft > 0 ? AppColors.success : (daysLeft == 0 ? Colors.orangeAccent : AppColors.error);
-                          return Text(
-                            text,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          );
-                        }),
                       ],
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  // Animated progress bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0, end: goal.progress),
-                      duration: const Duration(milliseconds: 800),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, value, _) {
-                        return LinearProgressIndicator(
-                          value: value,
-                          backgroundColor: Colors.black26,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            goal.progress >= 1.0 ? AppColors.success : AppColors.primary,
-                          ),
-                          minHeight: 10,
-                        );
-                      },
+                  ] else ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Target: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(goal.targetAmount)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
                     ),
-                  ),
+                    if (goal.targetDate != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.event, color: Colors.white70, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Hari H: ${DateFormat('dd MMM yyyy', 'id_ID').format(goal.targetDate!)}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Builder(builder: (context) {
+                            final daysLeft = goal.targetDate!.difference(DateTime.now()).inDays;
+                            final text = daysLeft > 0 ? '($daysLeft hari lagi)' : (daysLeft == 0 ? '(Hari ini!)' : '(Terlewat ${daysLeft.abs()} hari)');
+                            final color = daysLeft > 0 ? AppColors.success : (daysLeft == 0 ? Colors.orangeAccent : AppColors.error);
+                            return Text(
+                              text,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    // Animated progress bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: goal.progress),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, _) {
+                          return LinearProgressIndicator(
+                            value: value,
+                            backgroundColor: Colors.black26,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              goal.progress >= 1.0 ? AppColors.success : AppColors.primary,
+                            ),
+                            minHeight: 10,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

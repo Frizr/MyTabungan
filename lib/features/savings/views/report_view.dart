@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:tabungan_frontend/core/constants/app_colors.dart';
 import 'package:tabungan_frontend/features/savings/controllers/savings_controller.dart';
+import 'package:tabungan_frontend/features/savings/views/widgets/goal_type_toggle.dart';
 import 'package:tabungan_frontend/features/savings/views/widgets/looping_background.dart';
 import 'dart:ui';
 
@@ -40,9 +41,14 @@ class ReportView extends ConsumerWidget {
                   );
                 }
 
-                final totalTarget = goals.fold<double>(0, (sum, item) => sum + item.targetAmount);
+                final tabunganGoals = goals.where((g) => !g.isWallet);
+                // Target & persen keseluruhan cuma dari goal ber-target (Tabungan) —
+                // Dompet gak punya target jadi gak boleh ikut ngitung supaya
+                // persentase gak meleset gara-gara pembagi 0.
+                final totalTarget = tabunganGoals.fold<double>(0, (sum, item) => sum + item.targetAmount);
+                final tabunganSavings = tabunganGoals.fold<double>(0, (sum, item) => sum + item.currentAmount);
                 final totalSavings = goals.fold<double>(0, (sum, item) => sum + item.currentAmount);
-                final overallProgress = totalTarget > 0 ? (totalSavings / totalTarget).clamp(0.0, 1.0) : 0.0;
+                final overallProgress = totalTarget > 0 ? (tabunganSavings / totalTarget).clamp(0.0, 1.0) : 0.0;
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
@@ -167,7 +173,7 @@ class ReportView extends ConsumerWidget {
                       ...goals.asMap().entries.map((entry) {
                         final i = entry.key;
                         final goal = entry.value;
-                        final isComplete = goal.progress >= 1.0;
+                        final isComplete = !goal.isWallet && goal.progress >= 1.0;
                         return TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: Duration(milliseconds: 400 + (i * 120)),
@@ -199,13 +205,21 @@ class ReportView extends ConsumerWidget {
                                     children: [
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
-                                            child: Text(
-                                              goal.title,
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                GoalTypeBadge(type: goal.type),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  goal.title,
+                                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                           if (isComplete)
@@ -223,34 +237,43 @@ class ReportView extends ConsumerWidget {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                           ),
-                                          Text(
-                                            '${(goal.progress * 100).toStringAsFixed(0)}%',
-                                            style: TextStyle(
-                                              color: isComplete ? AppColors.success : AppColors.primary,
-                                              fontWeight: FontWeight.bold,
+                                          if (!goal.isWallet)
+                                            Text(
+                                              '${(goal.progress * 100).toStringAsFixed(0)}%',
+                                              style: TextStyle(
+                                                color: isComplete ? AppColors.success : AppColors.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
                                         ],
                                       ),
-                                      const SizedBox(height: 12),
-                                      TweenAnimationBuilder<double>(
-                                        tween: Tween<double>(begin: 0, end: goal.progress),
-                                        duration: Duration(milliseconds: 600 + (i * 120)),
-                                        curve: Curves.easeOutCubic,
-                                        builder: (context, animatedProgress, _) {
-                                          return ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
-                                            child: LinearProgressIndicator(
-                                              value: animatedProgress,
-                                              backgroundColor: AppColors.background.withValues(alpha: 0.5),
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                isComplete ? AppColors.success : AppColors.primary,
+                                      if (goal.isWallet) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Saldo bebas, tanpa target',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                                        ),
+                                      ] else ...[
+                                        const SizedBox(height: 12),
+                                        TweenAnimationBuilder<double>(
+                                          tween: Tween<double>(begin: 0, end: goal.progress),
+                                          duration: Duration(milliseconds: 600 + (i * 120)),
+                                          curve: Curves.easeOutCubic,
+                                          builder: (context, animatedProgress, _) {
+                                            return ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: LinearProgressIndicator(
+                                                value: animatedProgress,
+                                                backgroundColor: AppColors.background.withValues(alpha: 0.5),
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                  isComplete ? AppColors.success : AppColors.primary,
+                                                ),
+                                                minHeight: 6,
                                               ),
-                                              minHeight: 6,
-                                            ),
-                                          );
-                                        },
-                                      ),
+                                            );
+                                          },
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),

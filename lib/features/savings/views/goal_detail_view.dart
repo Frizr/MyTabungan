@@ -8,6 +8,7 @@ import '../models/savings_goal.dart';
 import '../controllers/savings_controller.dart';
 import 'widgets/add_transaction_sheet.dart';
 import 'widgets/edit_transaction_sheet.dart';
+import 'widgets/goal_type_toggle.dart';
 import 'widgets/looping_background.dart';
 
 class GoalDetailView extends ConsumerWidget {
@@ -64,63 +65,76 @@ class GoalDetailView extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
                         child: Column(
                           children: [
+                            GoalTypeBadge(type: currentGoal.type),
+                            const SizedBox(height: 16),
                             SizedBox(
                               width: 180,
                               height: 180,
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
-                                  // Glowing background for the ring
+                                  // Glowing background — wallets glow steady gold, goals glow by progress
                                   Container(
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: (currentGoal.progress >= 1.0 ? AppColors.success : AppColors.primary).withValues(alpha: 0.2),
+                                          color: (!currentGoal.isWallet && currentGoal.progress >= 1.0 ? AppColors.success : AppColors.primary)
+                                              .withValues(alpha: 0.2),
                                           blurRadius: 40,
                                           spreadRadius: 10,
                                         ),
                                       ],
                                     ),
                                   ),
-                                  TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0, end: currentGoal.progress),
-                                    duration: const Duration(milliseconds: 600),
-                                    curve: Curves.easeOutCubic,
-                                    builder: (context, animatedProgress, _) {
-                                      return CircularProgressIndicator(
-                                        value: animatedProgress,
-                                        strokeWidth: 14,
-                                        backgroundColor: AppColors.background.withValues(alpha: 0.5),
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          currentGoal.progress >= 1.0 ? AppColors.success : AppColors.primary,
-                                        ),
-                                        strokeCap: StrokeCap.round,
-                                      );
-                                    },
-                                  ),
-                                  Center(
-                                    child: TweenAnimationBuilder<double>(
-                                      tween: Tween<double>(begin: 0, end: (currentGoal.progress * 100).clamp(0, 100)),
-                                      duration: const Duration(milliseconds: 700),
+                                  if (currentGoal.isWallet)
+                                    Center(
+                                      child: Icon(
+                                        Icons.account_balance_wallet_rounded,
+                                        size: 64,
+                                        color: AppColors.primary,
+                                      ),
+                                    )
+                                  else ...[
+                                    TweenAnimationBuilder<double>(
+                                      tween: Tween<double>(begin: 0, end: currentGoal.progress),
+                                      duration: const Duration(milliseconds: 600),
                                       curve: Curves.easeOutCubic,
-                                      builder: (context, value, _) {
-                                        return Text(
-                                          '${value.toStringAsFixed(0)}%',
-                                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                                color: AppColors.primaryVariant,
-                                                fontWeight: FontWeight.bold,
-                                                shadows: [
-                                                  Shadow(
-                                                    color: AppColors.primary.withValues(alpha: 0.5),
-                                                    blurRadius: 10,
-                                                  )
-                                                ],
-                                              ),
+                                      builder: (context, animatedProgress, _) {
+                                        return CircularProgressIndicator(
+                                          value: animatedProgress,
+                                          strokeWidth: 14,
+                                          backgroundColor: AppColors.background.withValues(alpha: 0.5),
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            currentGoal.progress >= 1.0 ? AppColors.success : AppColors.primary,
+                                          ),
+                                          strokeCap: StrokeCap.round,
                                         );
                                       },
                                     ),
-                                  ),
+                                    Center(
+                                      child: TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(begin: 0, end: (currentGoal.progress * 100).clamp(0, 100)),
+                                        duration: const Duration(milliseconds: 700),
+                                        curve: Curves.easeOutCubic,
+                                        builder: (context, value, _) {
+                                          return Text(
+                                            '${value.toStringAsFixed(0)}%',
+                                            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                                  color: AppColors.primaryVariant,
+                                                  fontWeight: FontWeight.bold,
+                                                  shadows: [
+                                                    Shadow(
+                                                      color: AppColors.primary.withValues(alpha: 0.5),
+                                                      blurRadius: 10,
+                                                    )
+                                                  ],
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -133,12 +147,20 @@ class GoalDetailView extends ConsumerWidget {
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Target: ${currencyFormatter.format(currentGoal.targetAmount)}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 16, color: AppColors.textSecondary),
-                            ),
-                            if (currentGoal.targetDate != null) ...[
+                            if (currentGoal.isWallet) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Saldo bebas, tanpa target',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14, color: AppColors.textSecondary),
+                              ),
+                            ] else ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Target: ${currencyFormatter.format(currentGoal.targetAmount)}',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 16, color: AppColors.textSecondary),
+                              ),
+                            ],
+                            if (!currentGoal.isWallet && currentGoal.targetDate != null) ...[
                               const SizedBox(height: 12),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

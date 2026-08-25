@@ -20,13 +20,19 @@ class SavingsController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> addSavingsGoal({required String title, required double targetAmount, DateTime? targetDate}) async {
+  Future<void> addSavingsGoal({
+    required String title,
+    GoalType type = GoalType.tabungan,
+    required double targetAmount,
+    DateTime? targetDate,
+  }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(savingsRepositoryProvider);
       final newGoal = SavingsGoal(
         id: '', // Firestore will generate this
         title: title,
+        type: type,
         targetAmount: targetAmount,
         createdAt: DateTime.now(),
         targetDate: targetDate,
